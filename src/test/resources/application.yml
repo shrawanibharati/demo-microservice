@@ -1,0 +1,33 @@
+server:
+  port: 8081
+spring:
+  datasource:
+    url: jdbc:postgresql://host.docker.internal:5433/postgres
+    username: postgres
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false
+  cloud:
+    circuit:
+      breaker:
+        enabled: false
+transaction:
+  currency: EUR
+  xrates:
+    url: https://api.exchangerate.host/
+  messages:
+    error:
+      xrate-failure: Getting currency rates failed.
+      currency-not-found: Invalid Currency.
+      default: Exception occurred! Cause =
+hystrix:
+  command:
+    default:
+      circuitBreaker:
+        enabled: false
