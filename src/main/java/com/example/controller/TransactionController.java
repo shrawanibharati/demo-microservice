@@ -1,8 +1,8 @@
 package com.example.controller;
 
-import com.example.httprecord.RequestType;
-import com.example.httprecord.ResponseType;
-import com.example.service.TransactionService;
+import com.example.httprecord.transaction.TransactionRequestType;
+import com.example.httprecord.transaction.TransactionResponseType;
+import com.example.service.impl.TransactionCrudOperationServiceImpl;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.Api;
@@ -15,34 +15,24 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 
 @RestController
-@Api(value = "Commission microservice")
+@Api(value = "Transaction microservice")
 public class TransactionController {
 
-    @Autowired
-    TransactionService service;
+    final TransactionCrudOperationServiceImpl service;
+
+    public TransactionController(TransactionCrudOperationServiceImpl service) {
+        this.service = service;
+    }
 
     @ApiOperation("Add transaction")
     @PostMapping(value = "/transaction")
     @HystrixCommand(fallbackMethod = "fallbackTransaction", commandProperties = {
-            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000")})
-    public @ResponseBody ResponseEntity<Object> addTransaction(@RequestBody RequestType body) {
-        /*try {
-            Thread.sleep(1000000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }*/
-        return service.addTransaction(body);
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "10000")})
+    public @ResponseBody ResponseEntity<Object> addTransaction(@RequestBody TransactionRequestType body) {
+        return service.create(body);
     }
 
-    @ApiOperation("Get transaction")
-    @GetMapping(value = "/transaction")
-    @HystrixCommand(fallbackMethod = "fallbackTransaction", commandProperties = {
-            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000")})
-    public @ResponseBody ResponseEntity<Object> testTransaction() {
-        return new ResponseEntity<>(new ResponseType(BigDecimal.valueOf(100.0), "INR"), HttpStatus.CREATED);
-    }
-
-    public @ResponseBody ResponseEntity<Object> fallbackTransaction(RequestType body) {
+    public @ResponseBody ResponseEntity<Object> fallbackTransaction(TransactionRequestType body) {
         return new ResponseEntity<>("Fallback method for transaction API..", HttpStatus.CREATED);
     }
 }

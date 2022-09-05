@@ -1,0 +1,15 @@
+{
+  "motd": {
+    "msg": "If you or your company use this project or like what we doing, please consider backing us so we can continue maintaining and evolving this project.",
+    "url": "https://exchangerate.host/#/donate"
+  },
+  "success": true,
+  "historical": true,
+  "base": "EUR",
+  "date": "2021-01-01",
+  "rates": {
+    "AED": 4.472422,
+    "ALL": 123.368069,
+    "PLN": 4.570522
+  }
+}

@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: 'commission-microservice:latest'
+    image: 'demo-microservice:latest'
     build:
       context: .
     environment:
