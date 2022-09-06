@@ -11,7 +11,7 @@ Transaction Endpoints :
     Post : `/transaction`
 
 House Endpoints :
-    Posy, Get, Get all, Put, Delete : `/house`
+    Post, Get, Get all, Put, Delete : `/house`
     save all : `/house/all`
     sort by amount : `/house/sortbyamount`
 
