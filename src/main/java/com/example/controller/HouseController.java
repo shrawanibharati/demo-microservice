@@ -61,10 +61,11 @@ public class HouseController {
         return houseOperationServiceImpl.get(id);
     }
 
-    @GetMapping(value = "/sortbyamount")
+    @GetMapping(value = "/sort")
     @ApiOperation("Sort houses by amount")
-    public ResponseEntity<Object> sortByAmount() {
-        return houseOperationServiceImpl.sortByAmount();
+    public ResponseEntity<Object> sort(@RequestParam(required = false) String column, @RequestParam(defaultValue = "asc") String order) {
+
+        return houseOperationServiceImpl.sort(column, order);
     }
 
 }

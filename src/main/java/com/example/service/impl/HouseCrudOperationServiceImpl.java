@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -91,8 +93,39 @@ public class HouseCrudOperationServiceImpl implements CrudOperationService<Objec
     }
 
     @Transactional
-    public ResponseEntity<Object> sortByAmount(){
-        return new ResponseEntity<>(houseRepository.findAllByOrderByAmountAsc(), HttpStatus.OK);
+    public ResponseEntity<Object> sort(String column, String order){
+        if(validateColumnAndOrder(column,order))
+            return new ResponseEntity<Object>(sortByColumn(column,order), HttpStatus.OK);
+        else return new ResponseEntity<Object>("Invalid Column name", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private boolean validateColumnAndOrder(String column, String order){
+        return Arrays.asList("id","amount","date","currency").contains(column) &&
+                Arrays.asList("asc","desc").contains(order.toLowerCase()) ;
+    }
+
+    private List sortByColumn(String column, String order){
+        List<House> houses = houseRepository.findAll();
+        final int orderVal = order.toLowerCase().equals("desc")  ? -1:1;
+        switch (column){
+            case "id":{
+                Collections.sort(houses, (a,b) -> orderVal * (a.getId() > b.getId()? 1:a.getId() < b.getId()?-1:0));
+                break;
+            }
+            case "amount":{
+                Collections.sort(houses, (a,b) -> orderVal * (a.getAmount().compareTo(b.getAmount())));
+                break;
+            }
+            case "date":{
+                Collections.sort(houses, (a,b) -> orderVal * (a.getDate().compareTo(b.getDate())));
+                break;
+            }
+            case "currency":{
+                Collections.sort(houses, (a,b) -> orderVal * (a.getCurrency().compareTo(b.getCurrency())));
+                break;
+            }
+        }
+        return houses;
     }
 
 

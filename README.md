@@ -13,7 +13,7 @@ Transaction Endpoints :
 House Endpoints :
     Posy, Get, Get all, Put, Delete : `/house`
     save all : `/house/all`
-    sort by amount : `/house/sortbyamount`
+    sort by amount : `/house/sort?column={column_name}&order={asc/desc}`
 
 Database : Postgres
 Tests : Unit, Integration

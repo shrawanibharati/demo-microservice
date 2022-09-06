@@ -2,10 +2,8 @@
 package com.example;
 
 import com.example.httprecord.house.HouseRequestType;
-import com.example.httprecord.house.HouseResponseType;
 import com.example.httprecord.transaction.TransactionRequestType;
 import com.example.httprecord.transaction.TransactionResponseType;
-import com.example.model.House;
 import com.example.repository.HouseRepository;
 import com.example.repository.TransactionsRepository;
 import org.junit.jupiter.api.Assertions;
@@ -110,7 +108,7 @@ class DemoMicroserviceIntegrationTests
 			Assertions.assertEquals(HttpStatus.OK, responseEntityGetAll.getStatusCode());
 
 			//test sort by amount
-			ResponseEntity<Object> responseEntitySortByAmount = testRestTemplate.exchange(url+"/sortbyamount", HttpMethod.GET,
+			ResponseEntity<Object> responseEntitySortByAmount = testRestTemplate.exchange(url+"/sort?column=amount&order=asc", HttpMethod.GET,
 					null, Object.class);
 			Assertions.assertEquals(HttpStatus.OK, responseEntitySortByAmount.getStatusCode());
 

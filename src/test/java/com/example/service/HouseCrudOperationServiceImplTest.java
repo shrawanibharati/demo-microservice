@@ -143,10 +143,10 @@ class HouseCrudOperationServiceImplTest {
     }
 
     @Test
-    public void testSortByAmount() throws JsonProcessingException {
+    public void testSortByAmountAsc() throws JsonProcessingException {
         houseRepository.deleteAll();
         createTestHouses();
-        ResponseEntity<?> responseEntity = service.sortByAmount();
+        ResponseEntity<?> responseEntity = service.sort("amount", "asc");
         List housesDetailHttpResponse = (List) responseEntity.getBody();
         House house = (House) housesDetailHttpResponse.get(0);
         assertThat(house).isNotNull();
@@ -154,6 +154,58 @@ class HouseCrudOperationServiceImplTest {
         if (value.scale() < 1)
             value = value.setScale(0);
         assertEquals(value, BigDecimal.valueOf(1000));
+    }
+
+    @Test
+    public void testSortByAmountDesc() throws JsonProcessingException {
+        houseRepository.deleteAll();
+        createTestHouses();
+        ResponseEntity<?> responseEntity = service.sort("amount", "desc");
+        List housesDetailHttpResponse = (List) responseEntity.getBody();
+        House house = (House) housesDetailHttpResponse.get(0);
+        assertThat(house).isNotNull();
+        BigDecimal value = house.getAmount().stripTrailingZeros();
+        if (value.scale() < 1)
+            value = value.setScale(0);
+        assertEquals(value, BigDecimal.valueOf(100000));
+    }
+
+    @Test
+    public void testSortByIdDesc() throws JsonProcessingException {
+        houseRepository.deleteAll();
+        createTestHouses();
+        ResponseEntity<?> responseEntity = service.sort("id", "desc");
+        List housesDetailHttpResponse = (List) responseEntity.getBody();
+        House house1 = (House) housesDetailHttpResponse.get(0);
+        House house2 = (House) housesDetailHttpResponse.get(0);
+        assertThat(house1).isNotNull();
+        assertThat(house2).isNotNull();
+        BigDecimal value1 = house1.getAmount().stripTrailingZeros();
+        BigDecimal value2 = house2.getAmount().stripTrailingZeros();
+        if (value1.scale() < 1)
+            value1 = value1.setScale(0);
+        if (value2.scale() < 1)
+            value2 = value2.setScale(0);
+        assertThat(value1.compareTo(value2) > -1);
+    }
+
+    @Test
+    public void testSortByIdAsc() throws JsonProcessingException {
+        houseRepository.deleteAll();
+        createTestHouses();
+        ResponseEntity<?> responseEntity = service.sort("id", "desc");
+        List housesDetailHttpResponse = (List) responseEntity.getBody();
+        House house1 = (House) housesDetailHttpResponse.get(0);
+        House house2 = (House) housesDetailHttpResponse.get(0);
+        assertThat(house1).isNotNull();
+        assertThat(house2).isNotNull();
+        BigDecimal value1 = house1.getAmount().stripTrailingZeros();
+        BigDecimal value2 = house2.getAmount().stripTrailingZeros();
+        if (value1.scale() < 1)
+            value1 = value1.setScale(0);
+        if (value2.scale() < 1)
+            value2 = value2.setScale(0);
+        assertThat(value1.compareTo(value2) < 0);
     }
 
     private ResponseEntity<?> createSingleHouse() {
@@ -164,7 +216,7 @@ class HouseCrudOperationServiceImplTest {
 
     private void createTestHouses(){
         HouseRequestType house1 = new HouseRequestType(requestedDate, BigDecimal.valueOf(1000), currency, 42);
-        HouseRequestType house2 = house1.builder().amount(BigDecimal.valueOf(100000)).currency("INR").build();
+        HouseRequestType house2 =  new HouseRequestType(requestedDate, BigDecimal.valueOf(100000), currency, 42);
         service.create(house1);
         service.create(house2);
     }
