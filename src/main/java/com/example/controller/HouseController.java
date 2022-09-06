@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/house")
 @Api(value = "Transaction microservice")
 public class HouseController {
     
@@ -21,26 +22,26 @@ public class HouseController {
     }
 
 
-    @PostMapping(value = "/house")
+    @PostMapping
     @ApiOperation("Create a house")
     public ResponseEntity<Object> create(@RequestBody HouseRequestType houseRequestType) {
         Preconditions.checkNotNull(houseRequestType);
         return houseOperationServiceImpl.create(houseRequestType);
     }
 
-    @PostMapping(value = "/house/all")
+    @PostMapping(value = "all")
     @ApiOperation("Create all houses")
     public ResponseEntity<Object> createAll(@RequestBody List<HouseRequestType> houseRequestType) {
         return houseOperationServiceImpl.saveAll(houseRequestType);
     }
 
-    @GetMapping(value = "/house")
+    @GetMapping
     @ApiOperation("Get all house")
     public ResponseEntity<Object> detail() {
         return houseOperationServiceImpl.getAll();
     }
 
-    @PutMapping(value = "/house/{id}")
+    @PutMapping(value = "/{id}")
     @ApiOperation("Update house")
     public ResponseEntity<Object> update(@PathVariable( "id" ) int id, @RequestBody HouseRequestType houseRequestType) {
         Preconditions.checkNotNull(houseRequestType);
@@ -48,23 +49,22 @@ public class HouseController {
         return houseOperationServiceImpl.update(id, houseRequestType);
     }
 
-    @DeleteMapping(value = "/house/{id}")
+    @DeleteMapping(value = "/{id}")
     @ApiOperation("Delete house")
     public ResponseEntity<Object> delete(@PathVariable("id") int id) {
         return houseOperationServiceImpl.delete(id);
     }
 
-    @GetMapping(value = "/house/{id}")
+    @GetMapping(value = "/{id}")
     @ApiOperation("Get one house")
     public ResponseEntity<Object> get(@PathVariable int id) {
         return houseOperationServiceImpl.get(id);
     }
 
-    @GetMapping(value = "/house/sortbyamount")
+    @GetMapping(value = "/sortbyamount")
     @ApiOperation("Sort houses by amount")
     public ResponseEntity<Object> sortByAmount() {
         return houseOperationServiceImpl.sortByAmount();
     }
-
 
 }

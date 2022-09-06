@@ -57,22 +57,9 @@ public class TransactionCrudOperationServiceImpl implements CrudOperationService
     public ResponseEntity<Object> create(TransactionRequestType requestBody) {
         log.debug("Inside addTransaction method..");
         try {
-            Date requestedDate = requestBody.date();
-            String dateYearMonthDay = formatDate(CommonUtils.YYYYMMDD, requestedDate);
-
-            // get rates
-            ResponseEntity<Object> responseEntity = restTemplate.exchange(ratesURL + dateYearMonthDay, HttpMethod.GET, HttpEntity.EMPTY, Object.class);
-            log.debug("Response from x rates url : " +responseEntity.getBody());
-
-            if (!responseEntity.getStatusCode().equals(HttpStatus.OK))
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            else {
-                String thisTransactionCurrency = requestBody.currency();
-                BigDecimal thisTransactionAmount = requestBody.amount();
-                int clientId = requestBody.client_id();
 
                 //Convert amount to EUR
-                BigDecimal thisTransactionAmountInEUR = convertToEUR(responseEntity, thisTransactionCurrency, thisTransactionAmount, clientId);
+                BigDecimal thisTransactionAmountInEUR = convertToEUR(requestBody);
                 log.info("converted amount is : "+thisTransactionAmountInEUR);
 
                 if(thisTransactionAmountInEUR.compareTo(BigDecimal.valueOf(1000)) > -1)
@@ -85,10 +72,10 @@ public class TransactionCrudOperationServiceImpl implements CrudOperationService
                         thisTransactionAmountInEUR = thisTransactionAmountInEUR.add(thisTransactionAmountInEUR.multiply(BigDecimal.valueOf(0.05))).setScale(2, RoundingMode.CEILING);
                 }
                 //Save transaction to db
-                persistTransaction(requestBody, requestedDate, clientId, thisTransactionAmountInEUR);
+                persistTransaction(requestBody, requestBody.date(), requestBody.client_id(), thisTransactionAmountInEUR);
 
                 return new ResponseEntity<>(new TransactionResponseType(thisTransactionAmountInEUR, EUR), HttpStatus.CREATED);
-            }
+
         } catch (TransactionException e) {
             return new ResponseEntity<>(defaultErrMsg + e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
@@ -97,29 +84,37 @@ public class TransactionCrudOperationServiceImpl implements CrudOperationService
     }
 
 
-    public BigDecimal convertToEUR(ResponseEntity<Object> responseEntity, String thisTransactionCurrency,
-                                   BigDecimal thisTransactionAmount, int clientId) throws TransactionException {
-        if (!thisTransactionCurrency.equals(EUR)) {
+    public BigDecimal convertToEUR(TransactionRequestType requestBody) throws TransactionException {
+
+        //get xchange rate
+        ResponseEntity<Object> responseEntity = restTemplate.exchange(ratesURL +
+                formatDate(CommonUtils.YYYYMMDD, requestBody.date()), HttpMethod.GET, HttpEntity.EMPTY, Object.class);
+        log.debug("Response from x rates url : " +responseEntity.getBody());
+
+        if (!responseEntity.getStatusCode().equals(HttpStatus.OK))
+            throw new TransactionException("Xrates not available!");
+
+        if (!requestBody.currency().equals(EUR)) {
             //get currency exchange rate from response
             if (responseEntity != null && responseEntity.getBody() != null) {
                 Map map = (Map) responseEntity.getBody();
                 if(map != null && map.get("rates") != null){
                     Map rates = (Map) map.get("rates");
-                    Object currencyRateObject = rates.get(thisTransactionCurrency);
+                    Object currencyRateObject = rates.get(requestBody.currency());
 
                     if (currencyRateObject == null) throw new TransactionException(defaultErrMsg + currencyNotFound);
                     else {
                         BigDecimal currencyRate = getBigDecimal(currencyRateObject);
 
                         // convert thisTransactionAmount to EUR with 2 DECIMAL
-                        BigDecimal thisTransactionAmountInEUR = thisTransactionAmount.divide(currencyRate, 2, RoundingMode.CEILING);
-                        log.info("Client client_id {} converted {} {} to {} {}", clientId, thisTransactionAmount, thisTransactionCurrency, thisTransactionAmountInEUR, EUR);
+                        BigDecimal thisTransactionAmountInEUR = requestBody.amount().divide(currencyRate, 2, RoundingMode.CEILING);
+                        log.info("Client client_id {} converted {} {} to {} {}", requestBody.client_id(), requestBody.amount(), requestBody.currency(), thisTransactionAmountInEUR, EUR);
 
                         return thisTransactionAmountInEUR;
                     }
                 }
             }
-        } else return thisTransactionAmount;
+        } else return requestBody.amount();
         throw new TransactionException("Response from xrates is null!");
     }
 
